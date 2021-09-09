@@ -1,0 +1,114 @@
+version: "3.8"
+
+services:
+  prom1:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./prom1.yml:/etc/prometheus/prometheus.yml
+      - ./data1:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-admin-api
+      - --storage.tsdb.max-block-duration=5m 
+      - --storage.tsdb.min-block-duration=5m
+    expose:
+     - 9090
+  prom2:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./prom2.yml:/etc/prometheus/prometheus.yml
+      - ./data2:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-admin-api
+      - --storage.tsdb.max-block-duration=5m 
+      - --storage.tsdb.min-block-duration=5m
+    expose:
+     - 9090
+  prom3:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./prom3.yml:/etc/prometheus/prometheus.yml
+      - ./data3:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-admin-api
+      - --storage.tsdb.max-block-duration=5m 
+      - --storage.tsdb.min-block-duration=5m
+    expose:
+     - 9090
+  prom4:
+    image: prom/prometheus
+    user: root
+    volumes:
+      - ./prom4.yml:/etc/prometheus/prometheus.yml
+      - ./data4:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-admin-api
+      - --storage.tsdb.max-block-duration=5m 
+      - --storage.tsdb.min-block-duration=5m
+    expose:
+     - 9090
+  sidecar1:
+    image: thanos
+    volumes:
+      - ./data1:/data
+    command:
+      - sidecar
+      - --tsdb.path=/data
+      - --prometheus.url=http://prom1:9090
+    expose:
+      - 10901
+      - 10902
+  sidecar2:
+    image: thanos
+    volumes:
+      - ./data2:/data
+    command:
+      - sidecar
+      - --tsdb.path=/data
+      - --prometheus.url=http://prom2:9090
+    expose:
+      - 10901
+      - 10902
+  sidecar3:
+    image: thanos
+    volumes:
+      - ./data3:/data
+    command:
+      - sidecar
+      - --tsdb.path=/data
+      - --prometheus.url=http://prom3:9090
+    expose:
+      - 10901
+      - 10902
+  sidecar4:
+    image: thanos
+    volumes:
+      - ./data4:/data
+    command:
+      - sidecar
+      - --tsdb.path=/data
+      - --prometheus.url=http://prom4:9090
+    expose:
+      - 10901
+      - 10902
+  query:
+    image: thanos
+    command:
+      - query
+      - --store=sidecar1:10901
+      - --store=sidecar2:10901
+      - --store=sidecar3:10901
+      - --store=sidecar4:10901
+      - --query.replica-label=replica
+    ports:
+      - 10902:10902

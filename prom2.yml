@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    cluster: 'c1'
+    replica: 'r2'
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prom1:9090','prom2:9090']
