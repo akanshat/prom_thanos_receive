@@ -13,6 +13,7 @@ services:
       - --web.enable-admin-api
       - --storage.tsdb.max-block-duration=5m 
       - --storage.tsdb.min-block-duration=5m
+      - --storage.tsdb.retention.time=20m
     expose:
      - 9090
   prom2:
@@ -27,6 +28,7 @@ services:
       - --web.enable-admin-api
       - --storage.tsdb.max-block-duration=5m 
       - --storage.tsdb.min-block-duration=5m
+      - --storage.tsdb.retention.time=20m
     expose:
      - 9090
   prom3:
@@ -41,6 +43,7 @@ services:
       - --web.enable-admin-api
       - --storage.tsdb.max-block-duration=5m 
       - --storage.tsdb.min-block-duration=5m
+      - --storage.tsdb.retention.time=20m
     expose:
      - 9090
   prom4:
@@ -55,16 +58,19 @@ services:
       - --web.enable-admin-api
       - --storage.tsdb.max-block-duration=5m 
       - --storage.tsdb.min-block-duration=5m
+      - --storage.tsdb.retention.time=20m
     expose:
      - 9090
   sidecar1:
     image: thanos
     volumes:
       - ./data1:/data
+      - ./bucket.yml:/bucket.yml
     command:
       - sidecar
       - --tsdb.path=/data
       - --prometheus.url=http://prom1:9090
+      - --objstore.config-file=/bucket.yml
     expose:
       - 10901
       - 10902
@@ -72,10 +78,12 @@ services:
     image: thanos
     volumes:
       - ./data2:/data
+      - ./bucket.yml:/bucket.yml
     command:
       - sidecar
       - --tsdb.path=/data
       - --prometheus.url=http://prom2:9090
+      - --objstore.config-file=/bucket.yml
     expose:
       - 10901
       - 10902
@@ -83,10 +91,12 @@ services:
     image: thanos
     volumes:
       - ./data3:/data
+      - ./bucket.yml:/bucket.yml
     command:
       - sidecar
       - --tsdb.path=/data
       - --prometheus.url=http://prom3:9090
+      - --objstore.config-file=/bucket.yml
     expose:
       - 10901
       - 10902
@@ -94,10 +104,12 @@ services:
     image: thanos
     volumes:
       - ./data4:/data
+      - ./bucket.yml:/bucket.yml
     command:
       - sidecar
       - --tsdb.path=/data
       - --prometheus.url=http://prom4:9090
+      - --objstore.config-file=/bucket.yml
     expose:
       - 10901
       - 10902
@@ -109,6 +121,41 @@ services:
       - --store=sidecar2:10901
       - --store=sidecar3:10901
       - --store=sidecar4:10901
+      - --store=store:10901
       - --query.replica-label=replica
     ports:
       - 10902:10902
+  minio:
+    image: minio/minio:RELEASE.2021-09-03T03-56-13Z
+    volumes:
+      - ./minio:/data
+    command:
+      - server
+      - /data
+      - --console-address
+      - :9001
+    environment:
+      MINIO_ACCESS_KEY: admin123
+      MINIO_SECRET_KEY: admin123
+    ports:
+      - 9000:9000
+      - 9001:9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+  store:
+    image: thanos
+    volumes:
+      - ./bucket.yml:/bucket.yml
+    command:
+      - store
+      - --objstore.config-file=/bucket.yml
+    ports:
+      - 10903:10902
+    expose:
+      - 10901
+    depends_on:
+      - minio
+    restart: unless-stopped

@@ -1,0 +1,17 @@
+{
+	"ulid": "01FF60622ZVK8XMXSYCPP375DA",
+	"minTime": 1631214905961,
+	"maxTime": 1631215200000,
+	"stats": {
+		"numSamples": 17400,
+		"numSeries": 870,
+		"numChunks": 870
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01FF60622ZVK8XMXSYCPP375DA"
+		]
+	},
+	"version": 1
+}
