@@ -1,0 +1,9 @@
+[
+    {
+        "endpoints": [
+            "receive1:10901",
+            "receive2:10901",
+            "receive3:10901"
+        ]
+    }
+]

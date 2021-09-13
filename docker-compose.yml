@@ -61,68 +61,16 @@ services:
       - --storage.tsdb.retention.time=20m
     expose:
      - 9090
-  sidecar1:
-    image: thanos
-    volumes:
-      - ./data1:/data
-      - ./bucket.yml:/bucket.yml
-    command:
-      - sidecar
-      - --tsdb.path=/data
-      - --prometheus.url=http://prom1:9090
-      - --objstore.config-file=/bucket.yml
-    expose:
-      - 10901
-      - 10902
-  sidecar2:
-    image: thanos
-    volumes:
-      - ./data2:/data
-      - ./bucket.yml:/bucket.yml
-    command:
-      - sidecar
-      - --tsdb.path=/data
-      - --prometheus.url=http://prom2:9090
-      - --objstore.config-file=/bucket.yml
-    expose:
-      - 10901
-      - 10902
-  sidecar3:
-    image: thanos
-    volumes:
-      - ./data3:/data
-      - ./bucket.yml:/bucket.yml
-    command:
-      - sidecar
-      - --tsdb.path=/data
-      - --prometheus.url=http://prom3:9090
-      - --objstore.config-file=/bucket.yml
-    expose:
-      - 10901
-      - 10902
-  sidecar4:
-    image: thanos
-    volumes:
-      - ./data4:/data
-      - ./bucket.yml:/bucket.yml
-    command:
-      - sidecar
-      - --tsdb.path=/data
-      - --prometheus.url=http://prom4:9090
-      - --objstore.config-file=/bucket.yml
-    expose:
-      - 10901
-      - 10902
   query:
     image: thanos
     command:
       - query
-      - --store=sidecar1:10901
-      - --store=sidecar2:10901
-      - --store=sidecar3:10901
-      - --store=sidecar4:10901
+      - --store=receive1:10901
+      - --store=receive2:10901
+      - --store=receive3:10901
       - --store=store:10901
       - --query.replica-label=replica
+      - --query.replica-label=receive_replica
     ports:
       - 10902:10902
   minio:
@@ -158,4 +106,49 @@ services:
       - 10901
     depends_on:
       - minio
+    restart: unless-stopped
+  receive1:
+    image: thanos
+    volumes:
+      - ./hashring.json:/hashring.json
+      - ./receive1-data:/data
+      - ./bucket.yml:/bucket.yml
+    command:
+      - receive
+      - --tsdb.path=/data
+      - --receive.replication-factor=2
+      - "--label=receive_replica=\"0\""
+      - --receive.local-endpoint=receive1:10901
+      - --receive.hashrings-file=/hashring.json
+      - --objstore.config-file=/bucket.yml
+    restart: unless-stopped
+  receive2:
+    image: thanos
+    volumes:
+      - ./hashring.json:/hashring.json
+      - ./receive2-data:/data
+      - ./bucket.yml:/bucket.yml
+    command:
+      - receive
+      - --tsdb.path=/data
+      - --receive.replication-factor=2
+      - "--label=receive_replica=\"1\""
+      - --receive.local-endpoint=receive2:10901
+      - --receive.hashrings-file=/hashring.json
+      - --objstore.config-file=/bucket.yml
+    restart: unless-stopped
+  receive3:
+    image: thanos
+    volumes:
+      - ./hashring.json:/hashring.json
+      - ./receive3-data:/data
+      - ./bucket.yml:/bucket.yml
+    command:
+      - receive
+      - --tsdb.path=/data
+      - --receive.replication-factor=2
+      - "--label=receive_replica=\"2\""
+      - --receive.local-endpoint=receive3:10901
+      - --receive.hashrings-file=/hashring.json
+      - --objstore.config-file=/bucket.yml
     restart: unless-stopped
