@@ -1,0 +1,17 @@
+{
+	"ulid": "01FFG3290HYGQF13MJ24W84177",
+	"minTime": 1631553798858,
+	"maxTime": 1631553915743,
+	"stats": {
+		"numSamples": 17590,
+		"numSeries": 2247,
+		"numChunks": 2247
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01FFG3290HYGQF13MJ24W84177"
+		]
+	},
+	"version": 1
+}

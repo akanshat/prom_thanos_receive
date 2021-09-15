@@ -1,0 +1,17 @@
+{
+	"ulid": "01FFG3FTH0G4HPAXET4DDV35ES",
+	"minTime": 1631553911345,
+	"maxTime": 1631554200000,
+	"stats": {
+		"numSamples": 14546,
+		"numSeries": 832,
+		"numChunks": 832
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01FFG3FTH0G4HPAXET4DDV35ES"
+		]
+	},
+	"version": 1
+}

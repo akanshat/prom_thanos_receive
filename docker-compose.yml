@@ -152,3 +152,16 @@ services:
       - --receive.hashrings-file=/hashring.json
       - --objstore.config-file=/bucket.yml
     restart: unless-stopped
+  compactor:
+    image: thanos
+    volumes: 
+      - ./thanos-compact:/thanos-compact
+      - ./bucket.yml:/bucket.yml
+    command:
+      - compact
+      - --objstore.config-file=/bucket.yml
+      - --data-dir=thanos-compact
+      - --wait
+    ports:
+      - 10999:10902
+    restart: unless-stopped
